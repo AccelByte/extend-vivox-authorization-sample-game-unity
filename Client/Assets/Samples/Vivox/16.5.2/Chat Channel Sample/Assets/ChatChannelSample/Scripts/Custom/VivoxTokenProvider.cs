@@ -161,7 +161,7 @@ public class VivoxTokenProvider : IVivoxTokenProvider
         _url = url;
     }
 
-    public async Task<string> GetTokenAsync(
+    public VivoxTokenRequestV1 CreateTokenRequestV1(
         string issuer = null, TimeSpan? expiration = null, string targetUserUri = null,
         string action = null, string channelUri = null, string fromUserUri = null, string realm = null)
     {
@@ -174,29 +174,40 @@ public class VivoxTokenProvider : IVivoxTokenProvider
             throw new Exception($"unable to extract user ID from uri: {fromUserUri}");
         }
 
+        VivoxTokenRequestV1 tokenRequestV1 = new VivoxTokenRequestV1
+        {
+            Type = action,
+            Username = fromUserInfo.UserId,
+            TargetUsername = targetUserUri,
+        };
+
+        if (channelInfo.IsValid)
+        {
+            tokenRequestV1.ChannelId = channelInfo.ChannelId;
+            tokenRequestV1.ChannelType = channelInfo.ChannelTypeName;
+        }
+
+        if (targetUserInfo.IsValid)
+        {
+            tokenRequestV1.TargetUsername = targetUserInfo.UserId;
+        }
+
+        return tokenRequestV1;
+    }
+
+    public async Task<string> GetTokenAsync(
+        string issuer = null, TimeSpan? expiration = null, string targetUserUri = null,
+        string action = null, string channelUri = null, string fromUserUri = null, string realm = null)
+    {
+        VivoxTokenRequestV1 tokenRequestV1 = CreateTokenRequestV1(
+            issuer, expiration, targetUserUri,
+            action, channelUri, fromUserUri, realm);
+
         using (UnityWebRequest request = new UnityWebRequest(url: _url, method: UnityWebRequest.kHttpVerbPOST))
         {
             request.downloadHandler = new DownloadHandlerBuffer();
 
-            VivoxTokenRequestV1 body = new VivoxTokenRequestV1
-            {
-                Type = action,
-                Username = fromUserInfo.UserId,
-                TargetUsername = targetUserUri,
-            };
-
-            if (channelInfo.IsValid)
-            {
-                body.ChannelId = channelInfo.ChannelId;
-                body.ChannelType = channelInfo.ChannelTypeName;
-            }
-
-            if (targetUserInfo.IsValid)
-            {
-                body.TargetUsername = targetUserInfo.UserId;
-            }
-
-            string bodyJson = JsonConvert.SerializeObject(body);
+            string bodyJson = JsonConvert.SerializeObject(tokenRequestV1);
 
             byte[] bodyBytes = new System.Text.UTF8Encoding().GetBytes(bodyJson);
 
