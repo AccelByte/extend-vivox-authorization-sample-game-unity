@@ -731,3 +731,8 @@ sysinfo.txt
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/unity,csharp,monodevelop,visualstudio,rider
+
+!Packages/manifest.json
+!Packages/packages-lock.json
+
+!ProjectSettings/Packages/*
