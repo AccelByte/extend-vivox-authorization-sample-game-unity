@@ -74,7 +74,7 @@ public class VivoxTokenProvider : IVivoxTokenProvider
                 {
                     case "e":
                         return "echo";
-                    case "p":
+                    case "d":
                         return "positional";
                     case "g":
                         return "nonpositional";

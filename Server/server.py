@@ -96,7 +96,7 @@ vivox_token_duration = env.int("VIVOX_TOKEN_DURATION", 90)
 
 vivox_channel_types: Dict[str, str] = {
     "echo": "e",
-    "positional": "p",
+    "positional": "d",
     "nonpositional": "g",
 }
 
