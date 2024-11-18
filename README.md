@@ -1,4 +1,4 @@
-# Extend RTU Vivox Sample Game Unity
+# Extend Vivox Sample Game Unity
 
 ## Prerequisites
 
