@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 #if AUTH_PACKAGE_PRESENT
 using Unity.Services.Authentication;
 #endif
+// EDIT BEGIN
+using AccelByte.Core;
+using AccelByte.Models;
+// EDIT END
 
 public class VivoxVoiceManager : MonoBehaviour
 {
@@ -77,11 +81,25 @@ public class VivoxVoiceManager : MonoBehaviour
         await UnityServices.InitializeAsync(options);
 
         // EDIT BEGIN
+        LoginOntoAccelByte();
         VivoxService.Instance.SetTokenProvider(new VivoxTokenProvider(url: _tokenProviderUrl));
         // EDIT END
 
         await VivoxService.Instance.InitializeAsync();
 
+    }
+
+    private void LoginOntoAccelByte()
+    {
+        ApiClient apiClient = AccelByteSDK.GetClientRegistry().GetApi();
+        ResultCallback<TokenData, OAuthError> callback = result =>
+        {
+            if (result.IsError)
+            {
+                Debug.LogWarning($"Failed to log onto AccelByte: ${result.Error}");
+            }
+        };
+        apiClient.GetUser().LoginWithDeviceId(callback);
     }
 
     public async Task InitializeAsync(string playerName)

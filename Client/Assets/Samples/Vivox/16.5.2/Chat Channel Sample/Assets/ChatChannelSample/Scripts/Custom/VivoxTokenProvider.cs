@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Unity.Services.Vivox;
 using UnityEngine.Networking;
+using AccelByte.Api;
+using AccelByte.Core;
 
 public class VivoxTokenProvider : IVivoxTokenProvider
 {
@@ -215,9 +217,21 @@ public class VivoxTokenProvider : IVivoxTokenProvider
 
             request.SetRequestHeader("Content-Type", "application/json");
 
+            ApiClient apiClient = AccelByteSDK.GetClientRegistry().GetApi();
+            UserSession userSession = apiClient.GetUser().Session;
+            if (userSession != null && !string.IsNullOrWhiteSpace(userSession.AuthorizationToken))
+            {
+                request.SetRequestHeader("Authorization", $"Bearer {userSession.AuthorizationToken}");
+            }
+
             await request.SendWebRequest();
 
             string responseText = request.downloadHandler.text;
+
+            if (request.isDone && request.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception($"{request.error} {responseText}");
+            }
 
             try
             {
